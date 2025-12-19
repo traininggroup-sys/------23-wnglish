@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ar">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>اختبار إلكتروني</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        font-weight: 900;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      #login-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 30px;
+        background-color: #ffffff;
+        border: 2px solid #007bff;
+        border-radius: 15px;
+        box-shadow: 0 5px 25px rgba(0, 123, 255, 0.2);
+        text-align: center;
+        transition: all 0.3s ease-in-out;
+      }
+
+      #login-container label {
+        display: block;
+        font-size: 18px;
+        color: #333;
+        margin-bottom: 8px;
+        text-align: right;
+      }
+
+      #login-container input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 20px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-sizing: border-box;
+      }
+
+      #login-container button {
+        width: 100%;
+        background-color: #007bff;
+        color: white;
+        padding: 12px 0;
+        font-size: 18px;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #login-container button:hover {
+        background-color: #0056b3;
+      }
+
+      #result {
+        margin-top: 20px;
+        text-align: right;
+      }
+
+      #timer {
+        font-size: 20px;
+        color: red;
+        font-weight: bold;
+      }
+
+      h2 {
+        font-size: 22px;
+        font-weight: 900;
+        color: #000000;
+      }
+
+      label {
+        font-size: 18px;
+        font-weight: 900;
+        color: #333333;
+      }
+
+      #next-button {
+        position: absolute;
+        left: 20px;
+        bottom: 20px;
+        padding: 10px 20px;
+        font-weight: 900;
+      }
+
+      .correct-answer {
+        color: green;
+        font-weight: 900;
+      }
+
+      .wrong-answer {
+        color: red;
+        font-weight: 900;
+      }
+
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      ul li {
+        margin-bottom: 15px;
+        background-color: #f0f4f8;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: 900;
+        color: #000;
+        font-size: 18px;
+      }
+
+      #result h2,
+      #result h3,
+      #result p {
+        font-weight: 900;
+        color: #000;
+        font-size: 18px;
+        text-align: right;
+      }
+
+      #retry-button {
+        padding: 10px 20px;
+        font-weight: bold;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 20px;
+      }
+
+      label[lang="en"] {
+        direction: ltr;
+        text-align: left;
+        display: block;
+        margin-bottom: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>التدريب علي اختبارات الجهاز المركزى</h2>
+
+    <div id="login-container">
+      <label for="password">🔒 أدخل كلمة المرور:</label>
+      <input id="password" type="password" placeholder="مثال: 12345678" />
+      <label for="duration">⏳ حدد مدة الاختبار (بالدقائق):</label>
+      <input id="duration" type="number" value="5" min="1" />
+      <button onclick="checkPassword()">🚀 دخول</button>
+    </div>
+
+    <div class="hidden" id="quiz">
+      <div id="timer">5:00</div>
+      <div id="question-info">السؤال 1 من 20</div>
+      <form id="quizForm">
+        <div id="question-container"></div>
+        <button id="next-button" onclick="nextQuestion(event)" type="button">
+          التالي
+        </button>
+      </form>
+    </div>
+
+    <div class="hidden" id="result"></div>
+
+    <script>
+      const questions = [
+        {
+          question: "He ............ to school for 3 years.",
+          options: ["goes", "went", "has gone", "had gone"],
+          answer: "has gone",
+          explanation:
+            "كلمة 'for' متبوعة بفترة زمنية (3 سنوات) هي مفتاح المضارع التام. يُستخدم المضارع التام للتعبير عن فعل بدأ في الماضي ولا يزال له صلة أو استمرار حتى اللحظة الحالية.",
+        },
+        {
+          question: "He .......... to school this morning.",
+          options: ["has gone", "goes", "had gone", "went"],
+          answer: "went",
+          explanation:
+            "عبارة 'this morning' تشير إلى وقت محدد في الماضي، لذلك نستخدم الماضي البسيط للتعبير عن الفعل.",
+        },
+        {
+          question: "What is the opposite of 'thirsty'?",
+          options: ["Hungry", "Quenched", "Hot", "Weak"],
+          answer: "Quenched",
+          explanation: "عكس كلمة 'thirsty' هو 'مرتوي'.",
+        },
+        {
+          question:
+            "The correct form of the verb 'help' with (he / she / it) is:",
+          options: ["help's", "help", "helps", "helping"],
+          answer: "helps",
+          explanation: "مع he/she/it في المضارع البسيط نضيف s للفعل.",
+        },
+        {
+          question: "Put the verb 'do' in the past simple:",
+          options: ["Done", "Do", "diid", "did"],
+          answer: "did",
+          explanation: "الماضي البسيط للفعل 'do' هو 'did'.",
+        },
+        {
+          question: "Which of the following is a noun?",
+          options: ["take", "fast", "run", "go"],
+          answer: "fast",
+          explanation: "'fast' يمكن أن يكون اسماً، أما باقي الكلمات فهي أفعال.",
+        },
+        {
+          question: "My friend and I went to buy ____",
+          options: ["furniture", "happiness", "quickly", "run"],
+          answer: "furniture",
+          explanation: "الكلمة المناسبة للشراء هي 'furniture' أي أثاث.",
+        },
+        {
+          question: "Choose the correct preposition for time:",
+          options: ["in", "on", "at", "by"],
+          answer: "at",
+          explanation: "للتعبير عن وقت محدد نستخدم 'at'.",
+        },
+        {
+          question: "Reading a ____",
+          options: ["book", "car", "chair", "table"],
+          answer: "book",
+          explanation: "ما يُقرأ هو 'book' أي كتاب.",
+        },
+        {
+          question: "Riding a ____",
+          options: ["bike", "pen", "phone", "bag"],
+          answer: "bike",
+          explanation: "نركب الدراجة 'bike'.",
+        },
+        {
+          question: "Which animal has scales on its skin?",
+          options: ["cat", "crocodile", "elephant", "rabbit"],
+          answer: "crocodile",
+          explanation:
+            "الحيوان الذي له حراشيف على الجلد هو التمساح 'crocodile'.",
+        },
+        {
+          question: "Choose the opposite of 'summer':",
+          options: ["spring", "hot", "winter", "autumn"],
+          answer: "winter",
+          explanation: "عكس الصيف 'summer' هو الشتاء 'winter'.",
+        },
+        {
+          question: "We sit on ____:",
+          options: ["the chair", "the table", "the bed", "the floor"],
+          answer: "the chair",
+          explanation: "نقعد على الكرسي 'the chair'.",
+        },
+        {
+          question: "I sleep on ____:",
+          options: ["the chair", "the table", "the bed", "the floor"],
+          answer: "the bed",
+          explanation: "ننام على السرير 'the bed'.",
+        },
+        {
+          question: "Choose the past participle (third form) of the verb 'go':",
+          options: ["goed", "going", "went", "gone"],
+          answer: "gone",
+          explanation: "التصريف الثالث للفعل 'go' هو 'gone'.",
+        },
+        {
+          question:
+            "Choose the past participle (third form) of the verb 'see':",
+          options: ["saw", "seen", "seeing", "sees"],
+          answer: "seen",
+          explanation: "التصريف الثالث للفعل 'see' هو 'seen'.",
+        },
+        {
+          question: "What is the opposite of 'sharp'?",
+          options: ["Blunt", "Hard", "Pointed", "Smooth"],
+          answer: "Blunt",
+          explanation: "عكس كلمة 'sharp' (حاد) هو 'Blunt' أي غير حاد.",
+        },
+        {
+          question: "What is the opposite of 'soft'?",
+          options: ["Rough", "Light", "Smooth", "Thin"],
+          answer: "Rough",
+          explanation: "عكس كلمة 'soft' (ناعم) هو 'Rough' أي خشن.",
+        },
+      ];
+
+      let currentQuestion = 0;
+      let score = 0;
+      let timer;
+      let timeLeft;
+      let userAnswers = [];
+
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      function shuffleQuestions() {
+        shuffle(questions);
+        questions.forEach((q) => shuffle(q.options));
+      }
+
+      function checkPassword() {
+        const passwordInput = document.getElementById("password").value;
+        const durationInput =
+          parseInt(document.getElementById("duration").value) || 10;
+        timeLeft = durationInput * 60;
+
+        if (passwordInput === "22176") {
+          shuffleQuestions();
+          document.getElementById("login-container").classList.add("hidden");
+          document.getElementById("quiz").classList.remove("hidden");
+          document.getElementById("result").classList.add("hidden");
+          currentQuestion = 0;
+          score = 0;
+          userAnswers = [];
+          loadQuestion();
+          startTimer();
+        } else {
+          alert("🚫 المحاولة غير صحيحة! تأكد من كتابة كلمة السر بشكل دقيق.");
+        }
+      }
+
+      function loadQuestion() {
+        const questionContainer = document.getElementById("question-container");
+        questionContainer.innerHTML = `
+    <h2 lang="en" dir="ltr">${questions[currentQuestion].question}</h2>
+    ${questions[currentQuestion].options
+      .map(
+        (option) => `
+      <label lang="en" dir="ltr">
+        <input type="radio" name="option" value="${option}" />
+        ${option}
+      </label><br>
+    `
+      )
+      .join("")}
+  `;
+        document.getElementById("question-info").textContent = `السؤال ${
+          currentQuestion + 1
+        } من ${questions.length}`;
+      }
+
+      function nextQuestion(event) {
+        event.preventDefault();
+        const selected = document.querySelector('input[name="option"]:checked');
+        if (!selected) return alert("اختر إجابة.");
+        userAnswers[currentQuestion] = selected.value;
+        if (selected.value === questions[currentQuestion].answer) score++;
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+          loadQuestion();
+        } else {
+          clearInterval(timer);
+          showResults();
+        }
+      }
+
+      function showResults(timeUp = false) {
+        document.getElementById("quiz").classList.add("hidden");
+        const resultDiv = document.getElementById("result");
+        resultDiv.classList.remove("hidden");
+
+        const percent = ((score / questions.length) * 100).toFixed(1);
+
+        let feedback = "";
+        if (percent == 100) {
+          feedback = "أنت بطل! برافو عليك 👏";
+        } else if (percent >= 80) {
+          feedback = "ممتاز! واضح إنك مذاكر كويس 💪";
+        } else if (percent >= 60) {
+          feedback = "كويس، بس محتاج تراجع شوية 🙂";
+        } else if (percent >= 40) {
+          feedback = "راجع الدروس تاني وحاول تركز أكتر 📚";
+        } else {
+          feedback = "ابدأ من الأول وراجع كويس، شد حيلك! 💡";
+        }
+
+        let warningMsg = "";
+        if (timeUp && currentQuestion < questions.length) {
+          warningMsg = `
+        <p style="color: red;">⏰ انتهى الوقت قبل إكمال جميع الأسئلة.</p>
+        <p>في المرة الجاية حاول تحل الأسئلة بشكل أسرع علشان تلحق تكمل 💡</p>
+      `;
+        }
+
+        let review = "<h3>مراجعة الإجابات:</h3><ul>";
+        questions.forEach((q, i) => {
+          const ua = userAnswers[i] || "لم يُجب";
+          const correct = q.answer;
+          const isCorrect = ua === correct;
+          review += `
+        <li>
+          <strong>السؤال ${i + 1}:</strong> ${q.question}<br>
+          إجابتك: <span class="${
+            isCorrect ? "correct-answer" : "wrong-answer"
+          }">${ua}</span><br>
+          الإجابة الصحيحة: <span class="correct-answer">${correct}</span><br>
+          <strong>التفسير:</strong> ${q.explanation || "لا يوجد تفسير."}
+        </li>
+      `;
+        });
+        review += "</ul>";
+
+        resultDiv.innerHTML = `
+      ${warningMsg}
+      <h2>نتيجة الاختبار</h2>
+      <p>${score} من ${questions.length} | النسبة: ${percent}%</p>
+      <p>${feedback}</p>
+      ${review}
+      <button id="retry-button" onclick="location.reload()">إعادة المحاولة</button>
+    `;
+      }
+
+      function startTimer() {
+        timer = setInterval(() => {
+          timeLeft--;
+          const minutes = Math.floor(timeLeft / 60);
+          const seconds = timeLeft % 60;
+          document.getElementById("timer").textContent = `${minutes}:${
+            seconds < 10 ? "0" : ""
+          }${seconds}`;
+          if (timeLeft <= 0) {
+            clearInterval(timer);
+            alert("انتهى الوقت!");
+            showResults(true);
+          }
+        }, 1000);
+      }
+
+      document
+        .getElementById("quizForm")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            nextQuestion(event);
+          }
+        });
+    </script>
+  </body>
+</html>
